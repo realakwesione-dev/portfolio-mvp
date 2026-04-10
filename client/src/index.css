@@ -1,0 +1,205 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+:root{
+  --dp-navy: #002e5d; /* primary */
+  --dp-gold: #f7c948; /* accent */
+  --dp-accent: #0aa3a3; /* secondary */
+  --dp-red: #c62828; /* warm accent */
+}
+
+/* subtle text shadow to improve readability over images */
+.dp-heading {
+  text-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
+
+/* utility for main app background blending */
+.dp-bg-blend {
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: overlay;
+}
+
+/* full-screen blurred background layer */
+.dp-bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: overlay;
+  filter: blur(8px) saturate(1.05);
+  transform: scale(1.03);
+  will-change: transform, filter;
+}
+
+/* Splash screen styles */
+.splash-root {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(2,6,23,0.98), rgba(2,6,23,0.92));
+  will-change: opacity, transform;
+  /* allow tap/click to dismiss on touch devices */
+  pointer-events: auto;
+}
+
+.splash-inner {
+  text-align: center;
+  color: white;
+  max-width: 92%;
+  padding: 20px;
+  pointer-events: auto;
+  background: rgba(0,0,0,0.24);
+  border-radius: 12px;
+}
+
+.splash-title {
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--dp-gold);
+  letter-spacing: 0.01em;
+  font-size: clamp(18px, 6vw, 26px);
+}
+
+.splash-sub {
+  margin: 0;
+  color: #dbe7ef;
+  font-size: clamp(12px, 3.5vw, 14px);
+}
+
+/* animations: fade-in, hold, fade-out */
+.splash-show {
+  animation: splashIn 2200ms ease forwards;
+}
+.splash-hide {
+  animation: splashOut 600ms ease forwards;
+}
+
+@keyframes splashIn {
+  0% { opacity: 0; transform: translateY(8px) scale(0.998); }
+  20% { opacity: 1; transform: translateY(0) scale(1); }
+  80% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-6px) scale(0.996); }
+}
+
+@keyframes splashOut {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
+.app-content {
+  position: relative;
+  z-index: 10;
+}
+
+/* slightly darker card background for readability */
+.dp-card-contrast {
+  background: linear-gradient(rgba(2,6,23,0.7), rgba(2,6,23,0.55));
+}
+
+/* Reaction styles removed (likes feature disabled) */
+
+/* Mobile-friendly tap target */
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* gallery image hover/active effect */
+.dp-gallery-item {
+  transition: transform 320ms cubic-bezier(.2,.9,.2,1), box-shadow 320ms;
+}
+.dp-gallery-item:hover,
+.dp-gallery-item:focus {
+  transform: translateY(-6px) scale(1.04) rotate(-0.6deg);
+  box-shadow: 0 20px 50px rgba(2,6,23,0.45);
+}
+
+@media (max-width: 640px) {
+  .dp-gallery-item:hover,
+  .dp-gallery-item:focus {
+    transform: none; /* avoid large transforms on small screens */
+    box-shadow: 0 8px 20px rgba(2,6,23,0.45);
+  }
+}
+
+/* verification badge */
+/* verification badge removed */
+
+/* Top tier professional tag */
+.top-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px; /* cute rectangle */
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: white;
+  background: linear-gradient(90deg, #0b66a6, #0b79c1);
+  box-shadow: 0 8px 20px rgba(11,103,183,0.14), 0 2px 0 rgba(255,255,255,0.02) inset;
+  border: 1px solid rgba(10,55,95,0.14);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.top-tier-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(11,103,183,0.18), 0 3px 0 rgba(255,255,255,0.02) inset;
+}
+
+/* dragging state visuals */
+.dragging {
+  opacity: 0.6;
+  transform: scale(0.98);
+  box-shadow: 0 12px 30px rgba(2,6,23,0.5);
+}
+
+.drag-over-placeholder {
+  outline: 2px dashed rgba(247,201,72,0.7);
+  transform: translateY(-4px);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+
+/* Footer styling for public pages */
+.footer {
+  text-align: center;
+  font-size: 12px;
+  color: #888888;
+  padding: 20px 0;
+  z-index: 10;
+}
+
+/* Ensure footer sits below the main app content */
+@media (min-width: 0px) {
+  .min-h-screen > .footer {
+    position: relative;
+  }
+}
