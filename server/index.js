@@ -1,13 +1,10 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
-const http = require('http');
-const { Server } = require('socket.io');
-const { createAdapter } = require('@socket.io/redis-adapter');
-const { createClient } = require('redis');
 const rateLimit = require('express-rate-limit');
 
 require('dotenv').config();
@@ -15,10 +12,18 @@ require('dotenv').config();
 const Portfolio = require('./models/Portfolio');
 const adminAuth = require('./middleware/adminAuth');
 
-const app = express();
+const { Server } = require('socket.io');
+const { createAdapter } = require('@socket.io/redis-adapter');
+const { createClient } = require('redis');
 
 /* =========================
-   CORS CONFIG
+   APP INIT
+========================= */
+const app = express();
+const server = http.createServer(app);
+
+/* =========================
+   SOCKET.IO (INIT EARLY)
 ========================= */
 const allowedOrigins =
   process.env.NODE_ENV === 'production'
@@ -28,12 +33,19 @@ const allowedOrigins =
       ]
     : ['http://localhost:5173', 'http://localhost:3000'];
 
+const io = new Server(server, {
+  cors: { origin: allowedOrigins }
+});
+
+/* =========================
+   MIDDLEWARE
+========================= */
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error('CORS blocked'));
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+      return cb(new Error('CORS blocked'));
     }
   })
 );
@@ -42,10 +54,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /* =========================
-   FILE UPLOAD SETUP
+   FILE UPLOADS
 ========================= */
 const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 app.use('/uploads', express.static(uploadsDir));
 
@@ -70,12 +84,12 @@ if (!ADMIN_KEY || ADMIN_KEY === 'replace_with_secure_key') {
 }
 
 if (!MONGODB_URI || !MONGODB_URI.startsWith('mongodb+srv://')) {
-  console.error('FATAL: Invalid MongoDB SRV URI');
+  console.error('FATAL: Invalid MongoDB URI');
   process.exit(1);
 }
 
 /* =========================
-   DATABASE CONNECTION
+   DB CONNECTION
 ========================= */
 let dbConnected = false;
 
@@ -88,7 +102,7 @@ async function connectMongo() {
     dbConnected = true;
     console.log('MongoDB connected');
   } catch (err) {
-    console.error('MongoDB failed:', err.message);
+    console.error('MongoDB error:', err.message);
   }
 }
 
@@ -99,7 +113,7 @@ connectMongo();
 ========================= */
 const localPath = path.join(__dirname, 'portfolio.json');
 
-async function ensureLocal() {
+function ensureLocal() {
   if (!fs.existsSync(localPath)) {
     fs.writeFileSync(
       localPath,
@@ -108,37 +122,42 @@ async function ensureLocal() {
   }
 }
 
-async function getPortfolio() {
+function getPortfolioSync() {
   if (!dbConnected) {
-    await ensureLocal();
+    ensureLocal();
     return JSON.parse(fs.readFileSync(localPath));
   }
-
-  let p = await Portfolio.findOne();
-  if (!p) p = await Portfolio.create({});
-  return p;
+  return null;
 }
 
 /* =========================
-   API ROUTES
+   API ROUTE
 ========================= */
 app.get('/api/portfolio', async (req, res) => {
   try {
-    const data = await getPortfolio();
+    if (!dbConnected) {
+      return res.json(getPortfolioSync());
+    }
+
+    let data = await Portfolio.findOne();
+    if (!data) data = await Portfolio.create({});
     res.json(data);
-  } catch {
+  } catch (err) {
     res.status(500).json({ message: 'Error fetching portfolio' });
   }
 });
 
 /* =========================
-   ADMIN UPDATE
+   ADMIN RATE LIMIT
 ========================= */
 const limiter = rateLimit({
-  windowMs: 60000,
-  max: 15
+  windowMs: 60 * 1000,
+  max: 5
 });
 
+/* =========================
+   ADMIN UPDATE ROUTE
+========================= */
 app.post(
   '/MP_ADMIN_RESTRICTION/update',
   limiter,
@@ -152,21 +171,23 @@ app.post(
         updates.image = `/uploads/${req.files.image[0].filename}`;
       }
 
+      /* fallback mode */
       if (!dbConnected) {
-        await ensureLocal();
+        ensureLocal();
         const local = JSON.parse(fs.readFileSync(localPath));
         const merged = { ...local, ...updates };
+
         fs.writeFileSync(localPath, JSON.stringify(merged, null, 2));
 
-        if (io) io.emit('portfolio', merged);
+        io.emit('portfolio', merged);
         return res.json({ message: 'Updated locally', portfolio: merged });
       }
 
-      const portfolio = await getPortfolio();
+      const portfolio = await Portfolio.findOne();
       Object.assign(portfolio, updates);
       await portfolio.save();
 
-      if (io) io.emit('portfolio', portfolio);
+      io.emit('portfolio', portfolio);
 
       res.json({ message: 'Updated', portfolio });
     } catch (err) {
@@ -177,39 +198,42 @@ app.post(
 );
 
 /* =========================
-   SERVE FRONTEND (IMPORTANT)
+   STATIC FRONTEND SERVE (SAFE)
 ========================= */
-app.use(express.static(path.join(__dirname, '../client/dist')));
+const clientPath = path.join(__dirname, '../client/dist');
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-});
+if (fs.existsSync(clientPath)) {
+  app.use(express.static(clientPath));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientPath, 'index.html'));
+  });
+}
 
 /* =========================
-   SOCKET.IO
+   SOCKET.IO CONNECTION
 ========================= */
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: allowedOrigins }
-});
-
 if (REDIS_URL) {
   (async () => {
     try {
       const pub = createClient({ url: REDIS_URL });
       const sub = pub.duplicate();
+
       await pub.connect();
       await sub.connect();
+
       io.adapter(createAdapter(pub, sub));
       console.log('Redis adapter enabled');
-    } catch (e) {
-      console.error('Redis failed:', e.message);
+    } catch (err) {
+      console.error('Redis error:', err.message);
     }
   })();
 }
 
 io.on('connection', async (socket) => {
-  const data = await getPortfolio();
+  const data =
+    (await Portfolio.findOne()) || getPortfolioSync() || { name: 'Default' };
+
   socket.emit('portfolio', data);
 });
 
