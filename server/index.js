@@ -65,7 +65,10 @@ if (!fs.existsSync(uploadsDir)) {
 
 app.use('/uploads', express.static(uploadsDir));
 
-const storage = multer.diskStorage({
+// multer storage: use disk by default, but switch to memory when Cloudinary is configured
+let upload;
+// Default disk storage (fallback)
+const diskStorage = multer.diskStorage({
   destination: (_, __, cb) => cb(null, uploadsDir),
   filename: (_, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -73,12 +76,47 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage });
+upload = multer({ storage: diskStorage });
 
 /* =========================
    ENV VALIDATION
 ========================= */
 const { MONGODB_URI, ADMIN_KEY, REDIS_URL } = process.env;
+
+/* =========================
+   CLOUDINARY (OPTIONAL)
+========================= */
+const cloudinary = require('cloudinary').v2;
+
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUDNAME || process.env.CLOUDNAME;
+const cloudKey = process.env.CLOUDINARY_API_KEY || process.env.CLOUDINARY_KEY || process.env.KEY;
+const cloudSecret = process.env.CLOUDINARY_API_SECRET || process.env.CLOUDINARY_SECRET || process.env.API_SECRET;
+
+if (process.env.CLOUDINARY_URL) {
+  cloudinary.config({ secure: true, url: process.env.CLOUDINARY_URL });
+} else if (cloudName && cloudKey && cloudSecret) {
+  cloudinary.config({ cloud_name: cloudName, api_key: cloudKey, api_secret: cloudSecret, secure: true });
+}
+
+// If Cloudinary is configured, switch multer to memory storage so we can stream files
+if (cloudinary.config && (process.env.CLOUDINARY_URL || (cloudName && cloudKey && cloudSecret))) {
+  const memStorage = multer.memoryStorage();
+  upload = multer({ storage: memStorage });
+
+  // Helper: upload a buffer to Cloudinary
+  async function uploadBufferToCloudinary(buffer, originalname, folder = 'portfolio') {
+    return new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream({ folder }, (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+      stream.end(buffer);
+    });
+  }
+
+  // attach helper to app locals for use in routes
+  app.locals.uploadBufferToCloudinary = uploadBufferToCloudinary;
+}
 
 if (!ADMIN_KEY || ADMIN_KEY === 'replace_with_secure_key') {
   console.error('FATAL: Invalid ADMIN_KEY');
@@ -174,14 +212,48 @@ app.post(
   '/MP_ADMIN_RESTRICTION/update',
   limiter,
   adminAuth,
-  upload.fields([{ name: 'image', maxCount: 1 }]),
+  // accept main image and optional gallery files
+  upload.fields([{ name: 'image', maxCount: 1 }, { name: 'gallery', maxCount: 10 }]),
   async (req, res) => {
     try {
       const updates = { ...req.body };
 
-      // Normalize uploaded image path
+      // Normalize uploaded image path and upload to Cloudinary when configured
       if (req.files?.image) {
-        updates.image = `/uploads/${req.files.image[0].filename}`;
+        try {
+          if (app.locals.uploadBufferToCloudinary) {
+            const buf = req.files.image[0].buffer;
+            if (buf) {
+              const result = await app.locals.uploadBufferToCloudinary(buf, req.files.image[0].originalname);
+              updates.image = result && (result.secure_url || result.url) ? (result.secure_url || result.url) : `/uploads/${req.files.image[0].originalname}`;
+            }
+          } else if (req.files.image[0].filename) {
+            updates.image = `/uploads/${req.files.image[0].filename}`;
+          }
+        } catch (e) {
+          console.warn('Image upload failed:', e && e.message ? e.message : e);
+        }
+      }
+
+      // Handle gallery uploads (multiple files)
+      if (req.files?.gallery && req.files.gallery.length) {
+        const galleryUrls = [];
+        for (const f of req.files.gallery) {
+          try {
+            if (app.locals.uploadBufferToCloudinary && f.buffer) {
+              const r = await app.locals.uploadBufferToCloudinary(f.buffer, f.originalname, 'portfolio/gallery');
+              if (r && (r.secure_url || r.url)) galleryUrls.push(r.secure_url || r.url);
+            } else if (f.filename) {
+              galleryUrls.push(`/uploads/${f.filename}`);
+            }
+          } catch (e) {
+            console.warn('Gallery upload failed for', f.originalname, e && e.message ? e.message : e);
+          }
+        }
+
+        if (galleryUrls.length) {
+          updates.gallery = (updates.gallery || []).concat(galleryUrls);
+        }
       }
 
       // Helper: parse known complex fields coming from the admin form
