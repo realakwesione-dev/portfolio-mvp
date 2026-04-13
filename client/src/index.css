@@ -203,3 +203,45 @@ body {
     position: relative;
   }
 }
+
+/* Quill editor dark theme overrides to match admin UI */
+.ql-snow .ql-toolbar {
+  background: #071023; /* deep navy */
+  border: 1px solid rgba(148,163,184,0.08);
+  color: #cbd5e1;
+  border-radius: 8px 8px 0 0;
+}
+.ql-snow .ql-picker-label, .ql-snow .ql-picker-item {
+  color: #e6eef8;
+}
+.ql-snow .ql-container {
+  background: #071023; /* match admin card */
+  border: 1px solid rgba(148,163,184,0.06);
+  color: #e6eef8;
+  border-radius: 0 0 8px 8px;
+}
+.ql-snow .ql-editor {
+  background: transparent;
+  color: #e6eef8;
+  min-height: 160px;
+  padding: 12px 14px;
+  line-height: 1.6;
+}
+.ql-snow .ql-editor p {
+  margin: 0 0 0.75rem;
+}
+.ql-snow .ql-toolbar .ql-picker-options,
+.ql-snow .ql-toolbar .ql-picker-label {
+  background: transparent;
+}
+.ql-snow .ql-toolbar .ql-stroke, .ql-snow .ql-toolbar .ql-fill {
+  stroke: #cbd5e1;
+  fill: #cbd5e1;
+}
+.ql-snow .ql-editor a {
+  color: #7dd3fc;
+}
+
+/* make the Quill editor container fit the admin card */
+.react-quill { border-radius: 8px; overflow: hidden; }
+
