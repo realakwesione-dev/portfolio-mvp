@@ -39,6 +39,8 @@ function PublicPage() {
     return () => { document.body.style.overflow = ''; };
   }, [lightboxOpen]);
 
+  const safeNumber = (v) => Number(v || 0);
+
   // fetch portfolio
   useEffect(() => {
     api
@@ -117,15 +119,15 @@ function PublicPage() {
             <div className="grid gap-4 pt-4 sm:grid-cols-3">
               <div className="rounded-3xl bg-slate-950/80 p-4">
                 <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Initial</p>
-                <p className="mt-2 text-2xl font-semibold text-emerald-300">${portfolio.initialInvestment.toLocaleString()}</p>
+                <p className="mt-2 text-2xl font-semibold text-emerald-300">${safeNumber(portfolio?.initialInvestment).toLocaleString()}</p>
               </div>
               <div className="rounded-3xl bg-slate-950/80 p-4">
                 <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Current</p>
-                <p className="mt-2 text-2xl font-semibold text-sky-300">${portfolio.currentValue.toLocaleString()}</p>
+                <p className="mt-2 text-2xl font-semibold text-sky-300">${safeNumber(portfolio?.currentValue).toLocaleString()}</p>
               </div>
               <div className="rounded-3xl bg-slate-950/80 p-4">
                 <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Earnings</p>
-                <p className="mt-2 text-2xl font-semibold text-lime-300">${portfolio.netGain.toLocaleString()}</p>
+                <p className="mt-2 text-2xl font-semibold text-lime-300">${safeNumber(portfolio?.netGain).toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -153,10 +155,10 @@ function PublicPage() {
             <p className="text-slate-200">{portfolio.energyAssets || '—'}</p>
 
             <p className="mt-3 text-sm text-slate-400">Estimated lifetime earnings</p>
-            <p className="text-emerald-300">${(portfolio.estimatedLifetimeEarnings || 0).toLocaleString()}</p>
+            <p className="text-emerald-300">${safeNumber(portfolio?.estimatedLifetimeEarnings).toLocaleString()}</p>
 
             <p className="mt-3 text-sm text-slate-400">Total wealth generated</p>
-            <p className="text-lime-300">${(portfolio.totalWealthGenerated || 0).toLocaleString()}</p>
+            <p className="text-lime-300">${safeNumber(portfolio?.totalWealthGenerated).toLocaleString()}</p>
           </div>
         </div>
 
@@ -168,7 +170,7 @@ function PublicPage() {
                 {portfolio.yearlyIncome.slice(-10).map((y) => (
                   <li key={y.year} className="flex justify-between border-b border-slate-800/40 py-1">
                     <span>{y.year}</span>
-                    <span>${y.income.toLocaleString()}</span>
+                    <span>${safeNumber(y?.income).toLocaleString()}</span>
                   </li>
                 ))}
               </ul>
