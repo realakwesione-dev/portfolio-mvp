@@ -179,15 +179,96 @@ app.post(
     try {
       const updates = { ...req.body };
 
+      // Normalize uploaded image path
       if (req.files?.image) {
         updates.image = `/uploads/${req.files.image[0].filename}`;
+      }
+
+      // Helper: parse known complex fields coming from the admin form
+      try {
+        // galleryUrls may be JSON array string or newline/comma separated
+        if (typeof updates.galleryUrls === 'string' && updates.galleryUrls.trim()) {
+          try {
+            updates.gallery = JSON.parse(updates.galleryUrls);
+          } catch (e) {
+            // fallback: split by newlines or commas
+            updates.gallery = updates.galleryUrls.split(/\r?\n|,/).map(s => s.trim()).filter(Boolean);
+          }
+        }
+
+        // yearlyIncome can come in several formats from the admin form:
+        // - newline separated lines like "2020,10000\n2021,15000"
+        // - JSON array string
+        // - array of strings
+        if (updates.yearlyIncome) {
+          try {
+                if (typeof updates.yearlyIncome === 'string') {
+              const raw = updates.yearlyIncome.trim();
+              if (!raw) {
+                updates.yearlyIncome = [];
+              } else if (raw.startsWith('[')) {
+                // JSON array (possibly empty)
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed) || parsed.length === 0) {
+                  updates.yearlyIncome = [];
+                } else {
+                  updates.yearlyIncome = parsed.map((it) => {
+                    if (typeof it === 'object') return { year: Number(it.year) || 0, income: Number(it.income || it.value) || 0 };
+                    if (Array.isArray(it)) return { year: Number(it[0]) || 0, income: Number(it[1]) || 0 };
+                    return { year: 0, income: 0 };
+                  });
+                }
+              } else {
+                // newline or comma separated lines
+                updates.yearlyIncome = raw
+                  .split(/\r?\n/)
+                  .map((line) => line.trim())
+                  .filter(Boolean)
+                  .map((line) => {
+                    const parts = line.split(/[,\t ]+/).map((p) => p.trim()).filter(Boolean);
+                    return { year: Number(parts[0]) || 0, income: Number(parts[1]) || 0 };
+                  });
+              }
+            } else if (Array.isArray(updates.yearlyIncome)) {
+              if (updates.yearlyIncome.length === 0) {
+                updates.yearlyIncome = [];
+              } else {
+                updates.yearlyIncome = updates.yearlyIncome.map((it) => {
+                  if (typeof it === 'string') {
+                    const parts = it.split(/[,\t ]+/).map((p) => p.trim()).filter(Boolean);
+                    return { year: Number(parts[0]) || 0, income: Number(parts[1]) || 0 };
+                  }
+                  return { year: Number(it.year) || 0, income: Number(it.income || it.value) || 0 };
+                });
+              }
+            } else {
+              updates.yearlyIncome = [];
+            }
+          } catch (e) {
+            console.warn('Failed to parse yearlyIncome:', e.message);
+            updates.yearlyIncome = [];
+          }
+        }
+
+        // Coerce numeric fields
+        const numFields = ['initialInvestment', 'currentValue', 'netGain', 'estimatedLifetimeEarnings', 'totalWealthGenerated'];
+        for (const f of numFields) {
+          if (updates[f] !== undefined) updates[f] = Number(updates[f]) || 0;
+        }
+      } catch (parseErr) {
+        console.warn('Admin update parse warning:', parseErr.message);
       }
 
       /* fallback mode */
       if (!dbConnected) {
         ensureLocal();
         const local = JSON.parse(fs.readFileSync(localPath));
-        const merged = { ...local, ...updates };
+        // merge and persist locally with parsed updates
+        const merged = { ...local };
+        const allowedKeys = Object.keys(local);
+        for (const k of allowedKeys) {
+          if (updates[k] !== undefined) merged[k] = updates[k];
+        }
 
         fs.writeFileSync(localPath, JSON.stringify(merged, null, 2));
 
@@ -201,18 +282,49 @@ app.post(
         portfolio = new Portfolio({});
       }
 
-      Object.assign(portfolio, updates);
+      // DEBUG: log parsed updates to help diagnose production 500s
+      try {
+        console.info('[ADMIN DEBUG] parsed updates:', JSON.stringify(updates));
+      } catch (e) {
+        console.info('[ADMIN DEBUG] parsed updates (stringify failed)');
+      }
+
+      // Assign only allowed fields to avoid casting errors
+      const allowedKeys = Object.keys(Portfolio.schema.paths).filter(k => k !== '__v' && k !== '_id');
+
+      try {
+        console.info('[ADMIN DEBUG] allowedKeys:', allowedKeys.join(', '));
+      } catch (e) {
+        /* ignore */
+      }
+
+      for (const key of allowedKeys) {
+        if (updates[key] !== undefined) {
+          portfolio[key] = updates[key];
+        }
+      }
+
       await portfolio.save();
 
       io.emit('portfolio', portfolio);
 
       res.json({ message: 'Updated', portfolio });
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Update failed' });
+      console.error('UPDATE ERROR:', err && err.stack ? err.stack : err);
+
+      return res.status(500).json({
+        message: 'Update failed',
+        error: err && err.message ? err.message : String(err),
+        stack: err && err.stack ? err.stack : null,
+      });
     }
   }
 );
+
+// If someone visits the API path in a browser (GET), redirect to the admin UI.
+app.get('/MP_ADMIN_RESTRICTION/update', (req, res) => {
+  return res.redirect('/MP_ADMIN_RESTRICTION');
+});
 
 /* =========================
    STATIC FRONTEND SERVE (SAFE)
@@ -221,9 +333,25 @@ const clientPath = path.join(__dirname, '../client/dist');
 
 app.use(express.static(clientPath));
 
-// IMPORTANT: static middleware must run before the SPA fallback
-app.get('*', (req, res) => {
-  res.sendFile(path.join(clientPath, 'index.html'));
+// SPA fallback: only send index.html for requests that accept HTML
+// and are not API/uploads/socket requests. This prevents returning
+// index.html (text/html) for missing JS/CSS assets which breaks MIME checks.
+app.get('*', (req, res, next) => {
+  const urlPath = req.path || '';
+
+  // Skip API, uploads, and socket routes
+  if (urlPath.startsWith('/api') || urlPath.startsWith('/uploads') || urlPath.startsWith('/socket.io')) {
+    return next();
+  }
+
+  // If the client explicitly accepts HTML, serve index.html
+  if (req.accepts && req.accepts('html')) {
+    return res.sendFile(path.join(clientPath, 'index.html'));
+  }
+
+  // For non-HTML requests (likely assets), return 404 so the client
+  // receives proper status/type instead of an HTML page.
+  return res.status(404).end();
 });
 
 /* =========================
