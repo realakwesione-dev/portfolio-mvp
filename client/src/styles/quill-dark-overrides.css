@@ -1,0 +1,10 @@
+/* Strong, last-loaded overrides for Quill to enforce dark admin theme */
+.ql-snow .ql-toolbar { background: #071023 !important; border-color: rgba(148,163,184,0.08) !important; color: #cbd5e1 !important; }
+.ql-snow .ql-picker-label, .ql-snow .ql-picker-item { color: #e6eef8 !important; }
+.ql-snow .ql-container { background: #071023 !important; border-color: rgba(148,163,184,0.06) !important; color: #e6eef8 !important; }
+.ql-snow .ql-editor { background: transparent !important; color: #e6eef8 !important; min-height: 160px; padding: 12px 14px !important; }
+.ql-snow .ql-editor p { margin: 0 0 0.75rem; color: #e6eef8 !important; }
+.ql-snow .ql-toolbar .ql-picker-options, .ql-snow .ql-toolbar .ql-picker-label { background: transparent !important; }
+.ql-snow .ql-toolbar .ql-stroke, .ql-snow .ql-toolbar .ql-fill { stroke: #cbd5e1 !important; fill: #cbd5e1 !important; }
+.ql-editor.ql-blank::before { color: rgba(230,238,248,0.6) !important; }
+.react-quill { border-radius: 8px; overflow: hidden; }

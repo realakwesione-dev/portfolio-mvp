@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../api';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import '../styles/quill-dark-overrides.css';
 
 const QUILL_MODULES = {
   toolbar: [
