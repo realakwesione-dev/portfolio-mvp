@@ -2,7 +2,14 @@
 .ql-snow .ql-toolbar { background: #071023 !important; border-color: rgba(148,163,184,0.08) !important; color: #cbd5e1 !important; }
 .ql-snow .ql-picker-label, .ql-snow .ql-picker-item { color: #e6eef8 !important; }
 .ql-snow .ql-container { background: #071023 !important; border-color: rgba(148,163,184,0.06) !important; color: #e6eef8 !important; }
-.ql-snow .ql-editor { background: transparent !important; color: #ffffff !important; min-height: 160px; padding: 12px 14px !important; font-size: 16px !important; font-weight: 500 !important; line-height: 1.7 !important; }
+.ql-snow .ql-editor,
+.react-quill .ql-editor,
+.react-quill .ql-container,
+.ql-snow .ql-container {
+	background-color: #071023 !important;
+	color: #ffffff !important;
+}
+.ql-snow .ql-editor { min-height: 160px; padding: 12px 14px !important; font-size: 16px !important; font-weight: 500 !important; line-height: 1.7 !important; }
 .ql-snow .ql-editor p { margin: 0 0 0.75rem; color: #ffffff !important; }
 .ql-snow .ql-editor strong, .ql-snow .ql-editor b { color: #ffffff !important; font-weight: 700 !important; }
 .ql-snow .ql-editor em, .ql-snow .ql-editor i { color: #f1f5f9 !important; font-style: italic !important; }
@@ -14,3 +21,20 @@
 .ql-snow .ql-toolbar .ql-stroke, .ql-snow .ql-toolbar .ql-fill { stroke: #cbd5e1 !important; fill: #cbd5e1 !important; }
 .ql-editor.ql-blank::before { color: rgba(230,238,248,0.6) !important; }
 .react-quill { border-radius: 8px; overflow: hidden; }
+.ql-snow .ql-toolbar .ql-picker-options, .ql-snow .ql-toolbar .ql-picker-label { background: transparent !important; }
+.ql-snow .ql-toolbar .ql-stroke, .ql-snow .ql-toolbar .ql-fill { stroke: #cbd5e1 !important; fill: #cbd5e1 !important; }
+.ql-editor.ql-blank::before { color: rgba(255,255,255,0.55) !important; }
+.ql-snow .ql-editor { caret-color: #ffffff !important; }
+
+/* tooltips & picker dropdowns */
+.ql-snow .ql-tooltip,
+.ql-snow .ql-picker-options {
+	background: #071023 !important;
+	color: #ffffff !important;
+	border-color: rgba(148,163,184,0.08) !important;
+}
+
+/* ensure the editable area doesn't get inline white background */
+.react-quill .ql-editor[contenteditable="true"] {
+	background-color: #071023 !important;
+}
