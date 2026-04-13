@@ -217,13 +217,12 @@ app.post(
 ========================= */
 const clientPath = path.join(__dirname, '../client/dist');
 
-if (fs.existsSync(clientPath)) {
-  app.use(express.static(clientPath));
+app.use(express.static(clientPath));
 
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(clientPath, 'index.html'));
-  });
-}
+// IMPORTANT: static middleware must run before the SPA fallback
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientPath, 'index.html'));
+});
 
 /* =========================
    SOCKET.IO CONNECTION
