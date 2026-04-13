@@ -76,7 +76,21 @@ function AdminPage() {
     formData.append('estimatedLifetimeEarnings', estimatedLifetimeEarnings);
     formData.append('totalWealthGenerated', totalWealthGenerated);
     formData.append('about', about);
-    formData.append('yearlyIncome', yearlyIncomeText);
+    // Normalize yearlyIncome to JSON array of { year, value }
+    try {
+      const yearlyArray = (yearlyIncomeText || '')
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const parts = line.split(',').map((p) => p.trim());
+          return { year: Number(parts[0]) || 0, value: Number(parts[1]) || 0 };
+        });
+
+      formData.append('yearlyIncome', JSON.stringify(yearlyArray));
+    } catch (e) {
+      formData.append('yearlyIncome', JSON.stringify([]));
+    }
     if (imageFile) formData.append('image', imageFile);
     // prepare kept gallery urls and files in current order
     const keptUrls = galleryItems.filter((it) => it.type === 'url').map((it) => it.src);
@@ -88,17 +102,21 @@ function AdminPage() {
 
     try {
       const response = await api.post('/MP_ADMIN_RESTRICTION/update', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${adminKey}`
-          }
-        });
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${adminKey}`
+        }
+      });
 
       setStatus('Portfolio updated successfully.');
       return response.data;
     } catch (error) {
-      const message = error?.response?.data?.message || 'Update failed. Check admin key and server status.';
+      // Prefer structured server error info when available
+      const server = error?.response?.data;
+      const message = server?.message || server?.error || error?.message || 'Update failed. Check admin key and server status.';
       setStatus(message);
+      // show detailed stack in console for debugging
+      if (server?.stack) console.error('Server stack:', server.stack);
     } finally {
       setLoading(false);
     }
