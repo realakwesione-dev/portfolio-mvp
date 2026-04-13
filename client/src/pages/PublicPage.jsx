@@ -137,7 +137,9 @@ function PublicPage() {
 
       <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-8">
         <h2 className="text-xl font-semibold text-white">About this portfolio</h2>
-        <p className="mt-4 max-w-3xl leading-7 text-slate-300">{portfolio.about || 'This portfolio shows one investor record with current performance numbers and a profile image. Use the admin page to update the details and upload a new profile image.'}</p>
+        <div className="mt-4 max-w-3xl leading-7 text-slate-300 prose max-w-none">{
+          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(portfolio.about || '<p>This portfolio shows one investor record with current performance numbers and a profile image. Use the admin page to update the details and upload a new profile image.</p>') }} />
+        }</div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
