@@ -85,6 +85,27 @@ function AdminPage() {
       .catch(() => setStatus('Unable to load current portfolio values.'));
   }, []);
 
+  useEffect(() => {
+    // Inline fallback to force dark Quill visuals in case CSS overrides are blocked by load order or caching
+    const applyDark = () => {
+      const selectors = ['.ql-container', '.ql-editor', '.ql-toolbar', '.ql-picker', '.ql-tooltip'];
+      selectors.forEach((sel) => {
+        document.querySelectorAll(sel).forEach((el) => {
+          if (!el) return;
+          el.style.backgroundColor = 'transparent';
+          el.style.color = '#fff';
+        });
+      });
+      document.querySelectorAll('.ql-editor').forEach((el) => {
+        el.style.caretColor = '#fff';
+      });
+    };
+
+    applyDark();
+    const t = setTimeout(applyDark, 300);
+    return () => clearTimeout(t);
+  }, []);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setData((current) => ({ ...current, [name]: value }));
@@ -311,21 +332,21 @@ function AdminPage() {
 
         <label className="space-y-2 text-sm text-slate-200">
           <span className="text-sky-300 font-semibold">About this portfolio</span>
-          <div className="bg-white rounded"> 
+          <div className="rounded bg-slate-800/60">
             <ReactQuill value={about} onChange={setAbout} modules={QUILL_MODULES} formats={QUILL_FORMATS} theme="snow" />
           </div>
         </label>
 
         <label className="space-y-2 text-sm text-slate-200">
           <span className="text-sky-300 font-semibold">Investor bio</span>
-          <div className="bg-white rounded"> 
+          <div className="rounded bg-slate-800/60">
             <ReactQuill value={bio} onChange={setBio} modules={QUILL_MODULES} formats={QUILL_FORMATS} theme="snow" />
           </div>
         </label>
 
         <label className="space-y-2 text-sm text-slate-200">
           <span className="text-sky-300 font-semibold">Company history</span>
-          <div className="bg-white rounded"> 
+          <div className="rounded bg-slate-800/60">
             <ReactQuill value={companyHistory} onChange={setCompanyHistory} modules={QUILL_MODULES} formats={QUILL_FORMATS} theme="snow" />
           </div>
         </label>
