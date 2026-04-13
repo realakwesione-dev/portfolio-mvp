@@ -271,3 +271,8 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Lightweight health endpoint for quick deployment checks
+app.get('/api/test', (req, res) => {
+  res.json({ ok: true, time: new Date(), dbConnected });
+});

@@ -50,7 +50,7 @@ function PublicPage() {
 
   // Live updates via Socket.IO — falls back to initial GET if needed
   useEffect(() => {
-    const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+    const base = import.meta.env.VITE_API_BASE || window.location.origin;
     const socket = io(base, { transports: ['websocket'] });
 
     socket.on('connect', () => {
@@ -83,7 +83,7 @@ function PublicPage() {
     return <div className="rounded-3xl border border-rose-500 bg-rose-950/40 p-8 text-center text-rose-200">{error}</div>;
   }
 
-  const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+  const apiBase = import.meta.env.VITE_API_BASE || window.location.origin;
   const imageUrl = portfolio.image?.startsWith('http') ? portfolio.image : `${apiBase}${portfolio.image}`;
   const galleryFromApi = (portfolio.gallery && portfolio.gallery.length > 0)
     ? portfolio.gallery.map((g) => (g.startsWith('http') ? g : `${apiBase}${g}`))
