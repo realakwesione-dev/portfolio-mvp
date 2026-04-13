@@ -130,8 +130,8 @@ function AdminPage() {
   return (
     <div className="space-y-8">
       <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-8 shadow-lg shadow-black/20">
-        <h1 className="text-3xl font-semibold text-white">Admin panel</h1>
-        <p className="mt-3 max-w-2xl text-slate-300">
+        <h1 className="text-3xl font-extrabold text-white underline decoration-sky-400 decoration-2 underline-offset-4 italic">Admin panel</h1>
+        <p className="mt-3 max-w-2xl text-sky-200 italic">
           Update the portfolio data, including the displayed profile image. Use the secret admin key configured in your environment.
         </p>
       </div>
@@ -139,86 +139,86 @@ function AdminPage() {
       <form onSubmit={handleSubmit} className="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/80 p-8">
         <div className="grid gap-6 md:grid-cols-2">
           <label className="space-y-2 text-sm text-slate-200">
-            <span>Name</span>
+            <span className="text-sky-300 font-semibold">Name</span>
             <input
               name="name"
               value={data.name}
               onChange={handleChange}
-              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none transition focus:border-sky-500"
+              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none transition focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             />
           </label>
           <label className="space-y-2 text-sm text-slate-200">
-            <span>Admin key (kept private)</span>
+            <span className="text-sky-300 font-semibold">Admin key (kept private)</span>
             <input
               type="password"
               value={adminKey}
               onChange={(e) => setAdminKey(e.target.value)}
               placeholder="Enter admin key"
-              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none"
+              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             />
           </label>
           <label className="space-y-2 text-sm text-slate-200">
-            <span>Sector</span>
+            <span className="text-sky-300 font-semibold">Sector</span>
             <input
               name="sector"
               value={data.sector}
               onChange={handleChange}
-              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none transition focus:border-sky-500"
+              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none transition focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             />
           </label>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
           <label className="space-y-2 text-sm text-slate-200">
-            <span>Date of birth</span>
-            <input value={dob} onChange={(e) => setDob(e.target.value)} className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100" />
+            <span className="text-sky-300 font-semibold">Date of birth</span>
+            <input value={dob} onChange={(e) => setDob(e.target.value)} className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 focus:ring-2 focus:ring-sky-500" />
           </label>
           <label className="space-y-2 text-sm text-slate-200">
-            <span>Place of birth</span>
-            <input value={birthPlace} onChange={(e) => setBirthPlace(e.target.value)} className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100" />
+            <span className="text-sky-300 font-semibold">Place of birth</span>
+            <input value={birthPlace} onChange={(e) => setBirthPlace(e.target.value)} className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 focus:ring-2 focus:ring-sky-500" />
           </label>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
           <label className="space-y-2 text-sm text-slate-200">
-            <span>Initial investment</span>
+            <span className="text-sky-300 font-semibold">Initial investment</span>
             <input
               name="initialInvestment"
               type="number"
               value={data.initialInvestment}
               onChange={handleChange}
-              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none transition focus:border-sky-500"
+              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none transition focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             />
           </label>
           <label className="space-y-2 text-sm text-slate-200">
-            <span>Current value</span>
+            <span className="text-sky-300 font-semibold">Current value</span>
             <input
               name="currentValue"
               type="number"
               value={data.currentValue}
               onChange={handleChange}
-              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none transition focus:border-sky-500"
+              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none transition focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             />
           </label>
           <label className="space-y-2 text-sm text-slate-200">
-            <span>Net gain</span>
+            <span className="text-sky-300 font-semibold">Net gain</span>
             <input
               name="netGain"
               type="number"
               value={data.netGain}
               onChange={handleChange}
-              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none transition focus:border-sky-500"
+              className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none transition focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             />
           </label>
         </div>
 
         <label className="space-y-2 text-sm text-slate-200">
-          <span>Profile image</span>
+          <span className="text-sky-300 font-semibold">Profile image</span>
           <input
             type="file"
             accept="image/*"
             onChange={(event) => setImageFile(event.target.files?.[0] || null)}
-            className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 file:rounded-full file:border-0 file:bg-slate-800 file:px-4 file:py-2 file:text-sm file:text-slate-200"
+            className="w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 file:rounded-full file:border-0 file:bg-slate-800 file:px-4 file:py-2 file:text-sm file:text-slate-200 focus:ring-2 focus:ring-sky-500"
           />
         </label>
 
@@ -282,23 +282,23 @@ function AdminPage() {
         </label>
 
         <label className="space-y-2 text-sm text-slate-200">
-          <span>About this portfolio</span>
-          <textarea value={about} onChange={(e) => setAbout(e.target.value)} rows={4} className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100" />
+          <span className="text-sky-300 font-semibold">About this portfolio</span>
+          <textarea value={about} onChange={(e) => setAbout(e.target.value)} rows={4} className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 focus:ring-2 focus:ring-sky-500" />
         </label>
 
         <label className="space-y-2 text-sm text-slate-200">
-          <span>Investor bio</span>
-          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Short investor bio or profile" className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100" />
+          <span className="text-sky-300 font-semibold">Investor bio</span>
+          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Short investor bio or profile" className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 focus:ring-2 focus:ring-sky-500" />
         </label>
 
         <label className="space-y-2 text-sm text-slate-200">
-          <span>Company history</span>
-          <textarea value={companyHistory} onChange={(e) => setCompanyHistory(e.target.value)} rows={4} placeholder="Company background and history" className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100" />
+          <span className="text-sky-300 font-semibold">Company history</span>
+          <textarea value={companyHistory} onChange={(e) => setCompanyHistory(e.target.value)} rows={4} placeholder="Company background and history" className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 focus:ring-2 focus:ring-sky-500" />
         </label>
 
         <label className="space-y-2 text-sm text-slate-200">
-          <span>Yearly income (one per line as "year,income")</span>
-          <textarea value={yearlyIncomeText} onChange={(e) => setYearlyIncomeText(e.target.value)} rows={6} className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100" />
+          <span className="text-sky-300 font-semibold">Yearly income (one per line as "year,income")</span>
+          <textarea value={yearlyIncomeText} onChange={(e) => setYearlyIncomeText(e.target.value)} rows={6} className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 focus:ring-2 focus:ring-sky-500" />
         </label>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -326,7 +326,7 @@ function AdminPage() {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex items-center justify-center rounded-full bg-sky-500 px-6 py-3 text-base font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-6 py-3 text-base font-semibold text-slate-950 transition hover:bg-indigo-500 focus:ring-4 focus:ring-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? 'Saving...' : 'Save changes'}
         </button>
