@@ -83,7 +83,11 @@ if (!ADMIN_KEY || ADMIN_KEY === 'replace_with_secure_key') {
   process.exit(1);
 }
 
-if (!MONGODB_URI || !MONGODB_URI.startsWith('mongodb+srv://')) {
+if (
+  !MONGODB_URI ||
+  (!MONGODB_URI.startsWith('mongodb+srv://') &&
+   !MONGODB_URI.startsWith('mongodb://'))
+) {
   console.error('FATAL: Invalid MongoDB URI');
   process.exit(1);
 }
@@ -93,20 +97,26 @@ if (!MONGODB_URI || !MONGODB_URI.startsWith('mongodb+srv://')) {
 ========================= */
 let dbConnected = false;
 
-async function connectMongo() {
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 10000,
-      family: 4
-    });
-    dbConnected = true;
-    console.log('MongoDB connected');
-  } catch (err) {
-    console.error('MongoDB error:', err.message);
+async function connectMongoWithRetry(retries = 5) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await mongoose.connect(MONGODB_URI, {
+        serverSelectionTimeoutMS: 10000,
+        family: 4
+      });
+      dbConnected = true;
+      console.log('MongoDB connected');
+      return;
+    } catch (err) {
+      console.error(`Mongo retry ${i + 1}:`, err.message);
+      await new Promise((r) => setTimeout(r, 5000));
+    }
   }
+
+  console.warn('MongoDB unavailable, using local fallback');
 }
 
-connectMongo();
+connectMongoWithRetry();
 
 /* =========================
    LOCAL FALLBACK
@@ -183,7 +193,12 @@ app.post(
         return res.json({ message: 'Updated locally', portfolio: merged });
       }
 
-      const portfolio = await Portfolio.findOne();
+      let portfolio = await Portfolio.findOne();
+
+      if (!portfolio) {
+        portfolio = new Portfolio({});
+      }
+
       Object.assign(portfolio, updates);
       await portfolio.save();
 
@@ -231,8 +246,18 @@ if (REDIS_URL) {
 }
 
 io.on('connection', async (socket) => {
-  const data =
-    (await Portfolio.findOne()) || getPortfolioSync() || { name: 'Default' };
+  let data;
+
+  try {
+    data = dbConnected ? await Portfolio.findOne() : null;
+  } catch (err) {
+    console.error('Mongo fetch error on socket connection:', err.message);
+    data = null;
+  }
+
+  if (!data) {
+    data = getPortfolioSync() || { name: 'Default' };
+  }
 
   socket.emit('portfolio', data);
 });
