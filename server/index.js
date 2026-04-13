@@ -329,6 +329,19 @@ app.get('/MP_ADMIN_RESTRICTION/update', (req, res) => {
 /* =========================
    STATIC FRONTEND SERVE (SAFE)
 ========================= */
+// Normalize repeated slashes in the URL (e.g. //MP_ADMIN_RESTRICTION)
+app.use((req, res, next) => {
+  try {
+    if (req.url && req.url.includes('//')) {
+      const normalized = req.url.replace(/\/{2,}/g, '/');
+      return res.redirect(301, normalized);
+    }
+  } catch (e) {
+    /* ignore */
+  }
+  return next();
+});
+
 const clientPath = path.join(__dirname, '../client/dist');
 
 app.use(express.static(clientPath));
