@@ -14,6 +14,8 @@ function AdminPage() {
   const [adminKey, setAdminKey] = useState('');
   const [yearlyIncomeText, setYearlyIncomeText] = useState('');
   const [about, setAbout] = useState('');
+  const [bio, setBio] = useState('');
+  const [companyHistory, setCompanyHistory] = useState('');
   const [dob, setDob] = useState('');
   const [birthPlace, setBirthPlace] = useState('');
   const [investmentType, setInvestmentType] = useState('');
@@ -45,6 +47,8 @@ function AdminPage() {
         setEstimatedLifetimeEarnings(portfolio.estimatedLifetimeEarnings || '');
         setTotalWealthGenerated(portfolio.totalWealthGenerated || '');
         setAbout(portfolio.about || '');
+        setBio(portfolio.bio || '');
+        setCompanyHistory(portfolio.companyHistory || '');
         setYearlyIncomeText(
           (portfolio.yearlyIncome || []).map((y) => `${y.year},${y.income}`).join('\n')
         );
@@ -76,6 +80,8 @@ function AdminPage() {
     formData.append('estimatedLifetimeEarnings', estimatedLifetimeEarnings);
     formData.append('totalWealthGenerated', totalWealthGenerated);
     formData.append('about', about);
+    formData.append('bio', bio);
+    formData.append('companyHistory', companyHistory);
     // Normalize yearlyIncome to JSON array of { year, value }
     try {
       const yearlyArray = (yearlyIncomeText || '')
@@ -103,8 +109,7 @@ function AdminPage() {
     try {
       const response = await api.post('/MP_ADMIN_RESTRICTION/update', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${adminKey}`
+          Authorization: `Bearer ${adminKey}`
         }
       });
 
@@ -279,6 +284,16 @@ function AdminPage() {
         <label className="space-y-2 text-sm text-slate-200">
           <span>About this portfolio</span>
           <textarea value={about} onChange={(e) => setAbout(e.target.value)} rows={4} className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100" />
+        </label>
+
+        <label className="space-y-2 text-sm text-slate-200">
+          <span>Investor bio</span>
+          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Short investor bio or profile" className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100" />
+        </label>
+
+        <label className="space-y-2 text-sm text-slate-200">
+          <span>Company history</span>
+          <textarea value={companyHistory} onChange={(e) => setCompanyHistory(e.target.value)} rows={4} placeholder="Company background and history" className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100" />
         </label>
 
         <label className="space-y-2 text-sm text-slate-200">
