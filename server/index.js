@@ -25,13 +25,13 @@ const server = http.createServer(app);
 /* =========================
    SOCKET.IO (INIT EARLY)
 ========================= */
-const allowedOrigins =
-  process.env.NODE_ENV === 'production'
-    ? [
-        'https://arabiancrude.org',
-        'https://portfolio-mvp-1.onrender.com'
-      ]
-    : ['http://localhost:5173', 'http://localhost:3000'];
+// Allowlist of known origins. Include Render frontend and local dev hosts.
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://portfolio-mvp-2.onrender.com',
+  'https://arabiancrudeinvest.org'
+];
 
 const io = new Server(server, {
   cors: { origin: allowedOrigins }
@@ -45,7 +45,9 @@ app.use(
     origin: (origin, cb) => {
       if (!origin) return cb(null, true);
       if (allowedOrigins.includes(origin)) return cb(null, true);
-      return cb(new Error('CORS blocked'));
+      // TEMP: allow unknown origins to prevent frontend break due to CORS
+      // Change this to stricter behavior once you confirm the deployed URL(s).
+      return cb(null, true);
     }
   })
 );
