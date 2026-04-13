@@ -167,7 +167,7 @@ function PublicPage() {
           <div className="mt-2 max-h-40 overflow-auto rounded-lg border border-slate-800 bg-slate-950/60 p-3">
             {portfolio.yearlyIncome && portfolio.yearlyIncome.length > 0 ? (
               <ul className="text-sm text-slate-200">
-                {portfolio.yearlyIncome.slice(-10).map((y) => (
+                {portfolio.yearlyIncome.map((y) => (
                   <li key={y.year} className="flex justify-between border-b border-slate-800/40 py-1">
                     <span>{y.year}</span>
                     <span>${safeNumber(y?.income).toLocaleString()}</span>
