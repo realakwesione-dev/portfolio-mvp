@@ -245,3 +245,25 @@ body {
 /* make the Quill editor container fit the admin card */
 .react-quill { border-radius: 8px; overflow: hidden; }
 
+/* Strong overrides to prevent Quill's default white background */
+.react-quill .ql-snow .ql-toolbar,
+.ql-snow .ql-toolbar {
+  background: #071023 !important;
+}
+.react-quill .ql-snow .ql-container,
+.ql-snow .ql-container {
+  background: #071023 !important;
+  border: 1px solid rgba(148,163,184,0.06) !important;
+}
+.react-quill .ql-editor,
+.ql-snow .ql-editor {
+  background: transparent !important;
+  color: #e6eef8 !important;
+}
+.react-quill .ql-editor p,
+.ql-editor p { color: #e6eef8 !important; }
+.ql-editor.ql-blank::before { color: rgba(230,238,248,0.6) !important; }
+.ql-snow .ql-toolbar .ql-picker-label, .ql-snow .ql-toolbar .ql-picker-item { color: #e6eef8 !important; }
+.ql-snow .ql-toolbar .ql-stroke, .ql-snow .ql-toolbar .ql-fill { stroke: #cbd5e1 !important; fill: #cbd5e1 !important; }
+
+
