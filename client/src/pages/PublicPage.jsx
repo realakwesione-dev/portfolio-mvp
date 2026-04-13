@@ -182,12 +182,12 @@ function PublicPage() {
 
         <div className="mt-6">
           <h3 className="text-lg font-semibold text-white">Investor biography</h3>
-          <p className="mt-3 text-slate-300">{portfolio.bio || 'Biography not available.'}</p>
+          <p className="mt-3 text-slate-300 whitespace-pre-line">{portfolio.bio || 'Biography not available.'}</p>
         </div>
 
         <div className="mt-6">
           <h3 className="text-lg font-semibold text-white">Company history</h3>
-          <p className="mt-3 text-slate-300">{portfolio.companyHistory || 'Company history not available.'}</p>
+          <p className="mt-3 text-slate-300 whitespace-pre-line">{portfolio.companyHistory || 'Company history not available.'}</p>
         </div>
 
         <div className="mt-6">
