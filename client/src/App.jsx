@@ -2,11 +2,11 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import PublicPage from './pages/PublicPage';
 import AdminPage from './pages/AdminPage';
 import logoUrl from './assets/page_logo.jpg';
+import bgImg from './assets/background_img.jpg';
 import Splash from './components/Splash';
 import Footer from './components/Footer';
 
 function App() {
-  const bgImg = '/src/assets/background_img.jpg';
   const overlay = 'linear-gradient(120deg, rgba(0,46,93,0.62), rgba(247,201,72,0.12), rgba(198,40,40,0.08))';
 
   return (
