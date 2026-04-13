@@ -1,5 +1,32 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+const QUILL_MODULES = {
+  toolbar: [
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ header: [1, 2, 3, false] }],
+    [{ color: [] }, { background: [] }],
+    [{ font: [] }],
+    [{ align: [] }],
+    ['clean']
+  ]
+};
+
+const QUILL_FORMATS = [
+  'header',
+  'bold',
+  'italic',
+  'underline',
+  'strike',
+  'color',
+  'background',
+  'font',
+  'align',
+  'list',
+  'bullet'
+];
 
 // Admin key is entered at runtime to avoid exposing it in build artifacts
 
@@ -283,17 +310,23 @@ function AdminPage() {
 
         <label className="space-y-2 text-sm text-slate-200">
           <span className="text-sky-300 font-semibold">About this portfolio</span>
-          <textarea value={about} onChange={(e) => setAbout(e.target.value)} rows={4} className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 focus:ring-2 focus:ring-sky-500" />
+          <div className="bg-white rounded"> 
+            <ReactQuill value={about} onChange={setAbout} modules={QUILL_MODULES} formats={QUILL_FORMATS} theme="snow" />
+          </div>
         </label>
 
         <label className="space-y-2 text-sm text-slate-200">
           <span className="text-sky-300 font-semibold">Investor bio</span>
-          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Short investor bio or profile" className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 focus:ring-2 focus:ring-sky-500" />
+          <div className="bg-white rounded"> 
+            <ReactQuill value={bio} onChange={setBio} modules={QUILL_MODULES} formats={QUILL_FORMATS} theme="snow" />
+          </div>
         </label>
 
         <label className="space-y-2 text-sm text-slate-200">
           <span className="text-sky-300 font-semibold">Company history</span>
-          <textarea value={companyHistory} onChange={(e) => setCompanyHistory(e.target.value)} rows={4} placeholder="Company background and history" className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-100 focus:ring-2 focus:ring-sky-500" />
+          <div className="bg-white rounded"> 
+            <ReactQuill value={companyHistory} onChange={setCompanyHistory} modules={QUILL_MODULES} formats={QUILL_FORMATS} theme="snow" />
+          </div>
         </label>
 
         <label className="space-y-2 text-sm text-slate-200">

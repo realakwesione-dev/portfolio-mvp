@@ -4,6 +4,7 @@ import api from '../api';
 import img1 from '../assets/image1.jpeg';
 import img2 from '../assets/image2.jpeg';
 import img3 from '../assets/image3.jpeg';
+import DOMPurify from 'dompurify';
 
 function PublicPage() {
   const [portfolio, setPortfolio] = useState(null);
@@ -182,12 +183,16 @@ function PublicPage() {
 
         <div className="mt-6">
           <h3 className="text-lg font-semibold text-white">Investor biography</h3>
-          <p className="mt-3 text-slate-300 whitespace-pre-line">{portfolio.bio || 'Biography not available.'}</p>
+          <div className="mt-3 text-slate-300 prose max-w-none">{
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(portfolio.bio || '<p>Biography not available.</p>') }} />
+          }</div>
         </div>
 
         <div className="mt-6">
           <h3 className="text-lg font-semibold text-white">Company history</h3>
-          <p className="mt-3 text-slate-300 whitespace-pre-line">{portfolio.companyHistory || 'Company history not available.'}</p>
+          <div className="mt-3 text-slate-300 prose max-w-none">{
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(portfolio.companyHistory || '<p>Company history not available.</p>') }} />
+          }</div>
         </div>
 
         <div className="mt-6">
