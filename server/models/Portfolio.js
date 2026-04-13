@@ -16,7 +16,7 @@ const portfolioSchema = new mongoose.Schema({
   bio: { type: String, default: '' },
   about: { type: String, default: 'This portfolio shows one investor record with current performance numbers and a profile image. Use the admin page to update the details and upload a new profile image.' },
   companyHistory: { type: String, default: '' },
-  image: { type: String, required: true, default: '/uploads/default.png' },
+  image: { type: String, required: true, default: '/uploads/image2.jpeg' },
   gallery: { type: [String], default: [] }
 }, {
   timestamps: true

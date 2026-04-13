@@ -163,6 +163,9 @@ connectMongoWithRetry();
 ========================= */
 const localPath = path.join(__dirname, 'portfolio.json');
 
+// Default image path (can be overridden with env var)
+const DEFAULT_PROFILE_IMAGE = process.env.DEFAULT_PROFILE_IMAGE || '/uploads/image2.jpeg';
+
 function ensureLocal() {
   if (!fs.existsSync(localPath)) {
     fs.writeFileSync(
@@ -186,12 +189,28 @@ function getPortfolioSync() {
 app.get('/api/portfolio', async (req, res) => {
   try {
     if (!dbConnected) {
-      return res.json(getPortfolioSync());
+      const data = getPortfolioSync();
+      // ensure image exists locally, fallback to DEFAULT_PROFILE_IMAGE
+      if (data && data.image && data.image.startsWith('/uploads')) {
+        const imgPath = path.join(__dirname, data.image.replace(/^\//, ''));
+        if (!fs.existsSync(imgPath)) {
+          data.image = DEFAULT_PROFILE_IMAGE;
+        }
+      }
+      return res.json(data);
     }
 
     let data = await Portfolio.findOne();
     if (!data) data = await Portfolio.create({});
-    res.json(data);
+    const result = data.toObject ? data.toObject() : data;
+    // If image points to a local uploads path, validate existence and fallback if missing
+    if (result && result.image && typeof result.image === 'string' && result.image.startsWith('/uploads')) {
+      const imgPath = path.join(__dirname, result.image.replace(/^\//, ''));
+      if (!fs.existsSync(imgPath)) {
+        result.image = DEFAULT_PROFILE_IMAGE;
+      }
+    }
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching portfolio' });
   }
